@@ -15,6 +15,7 @@ public class playerCupcake : MonoBehaviour
     Vector3 velocity, velocityInput, velocityGravity;
     [SerializeField] ParticleSystem cookieCrumbParticle;
     [SerializeField] GameObject playerVisual;
+    public bool hit = false;
 
     int isFlyingCounter = 0;
     bool jumped = false;
@@ -52,6 +53,13 @@ public class playerCupcake : MonoBehaviour
         {
             velocityGravity.y += gravity * Time.deltaTime; //in the air (150%)
             isFlyingCounter += 1;
+
+            if (hit == true)
+            {
+                velocityGravity.y = 0;
+                hit = false;
+                //ouch bird code goes here
+            }
         }
 
         if (jump > 0 && characterController.isGrounded) //allows liftoff
@@ -59,6 +67,7 @@ public class playerCupcake : MonoBehaviour
             velocityGravity.y = Mathf.Sqrt(-2f * gravity);
             playerVisual.transform.rotation *= Quaternion.Euler(10*jumpedYDirection, 0, 0);
             jumpedYDirection = move.y;
+            jumped = true;
 
         }
 
@@ -66,14 +75,20 @@ public class playerCupcake : MonoBehaviour
         //they see me rollin, they hatin'
         Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 2*Time.deltaTime); //might help subtly idk
         Debug.Log(Quaternion.Angle(playerVisual.transform.rotation, transform.rotation)); //feel free to delete my debugs
+        Debug.Log("jumped: " + jumped);
+        Debug.Log("jumpedY: " + jumpedYDirection);
+        
 
-
-        if (isFlyingCounter > 4) //is not grounded (permanent w 5-6 frame delay)
+        if (isFlyingCounter > 4 && jumped == true) //is not grounded (permanent w 5-6 frame delay)
         {
             move = new Vector2(move.x, jumpedYDirection);
             playerVisual.transform.rotation *= Quaternion.Euler(10*jumpedYDirection, 0, 0);
+        }
+        else if (isFlyingCounter > 4 && jumped == false) //we all fall down
+        {
+            jumpedYDirection = move.y;
+            playerVisual.transform.rotation *= Quaternion.Euler(10 * move.y, 0, 0);
             jumped = true;
-
         }
         else if (jumped == true && isFlyingCounter < 4 && Quaternion.Angle(playerVisual.transform.rotation, transform.rotation) > 6f) //landed imperfectly
         {
@@ -81,21 +96,18 @@ public class playerCupcake : MonoBehaviour
             {
                 playerVisual.transform.rotation *= Quaternion.Euler(10*move.y, 0, 0);
                 jumpedYDirection = Mathf.Lerp(jumpedYDirection, move.y, 10*Time.deltaTime);
-
             }
             else //rolls even if you dont touch anything
             {
                 playerVisual.transform.rotation *= Quaternion.Euler(10*jumpedYDirection, 0, 0);
                 move = new Vector2(move.x, jumpedYDirection);
                 jumpedYDirection = Mathf.Lerp(jumpedYDirection, move.y, 10 * Time.deltaTime);
-
-
             }
         }
-        else if (jumpedYDirection == 0) //rotation perfection- back to normal movement unless you don't want to
+        else if (jumpedYDirection <= 0.01f && jumpedYDirection >= -0.01f || Quaternion.Angle(playerVisual.transform.rotation, transform.rotation) < 6f) //rotation perfection- back to normal movement unless you don't want to
         {
             jumped = false;
-            //playerVisual.transform.rotation = transform.rotation;
+            playerVisual.transform.rotation = transform.rotation;
             Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 10 * Time.deltaTime); //might help idk
 
         }
