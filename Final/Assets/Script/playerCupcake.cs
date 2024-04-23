@@ -10,6 +10,7 @@ public class playerCupcake : MonoBehaviour
     float jump;
     PlayerInput playerInput;
     CharacterController characterController;
+    [SerializeField] Animator playerAnimator;
     [SerializeField] float speed, height, gravity;
     [SerializeField] Transform cameraTransform, lookDirection;
     Vector3 velocity, velocityInput, velocityGravity;
@@ -18,7 +19,7 @@ public class playerCupcake : MonoBehaviour
     public bool hit = false;
 
     int isFlyingCounter = 0;
-    bool jumped = false;
+    bool jumped = false, animJumped = false;
     float jumpedYDirection = 0;
 
     void Start()
@@ -49,7 +50,7 @@ public class playerCupcake : MonoBehaviour
             velocityGravity.y = 0;
             isFlyingCounter = 0;
         }
-        else  //note to self: these two statements alternate every other frame so do not rely
+        else  //note to self: these two statements alternate every other frame so do not rely 
         {
             velocityGravity.y += gravity * Time.deltaTime; //in the air (150%)
             isFlyingCounter += 1;
@@ -83,6 +84,7 @@ public class playerCupcake : MonoBehaviour
         {
             move = new Vector2(move.x, jumpedYDirection);
             playerVisual.transform.rotation *= Quaternion.Euler(10*jumpedYDirection, 0, 0);
+            
         }
         else if (isFlyingCounter > 4 && jumped == false) //we all fall down
         {
@@ -92,6 +94,7 @@ public class playerCupcake : MonoBehaviour
         }
         else if (jumped == true && isFlyingCounter < 4 && Quaternion.Angle(playerVisual.transform.rotation, transform.rotation) > 6f) //landed imperfectly
         {
+
             if (move.y != 0) //permits roll direction change
             {
                 playerVisual.transform.rotation *= Quaternion.Euler(10*move.y, 0, 0);
@@ -110,6 +113,18 @@ public class playerCupcake : MonoBehaviour
             playerVisual.transform.rotation = transform.rotation;
             Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 10 * Time.deltaTime); //might help idk
 
+        }
+
+
+        //animation attempt
+        if (jumped && !animJumped && playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("cupcake_idle")){
+            playerAnimator.SetBool("isJumping", true);
+            animJumped = true;
+            Debug.Log("sqeuuueezing");
+        }else if (!jumped){
+            animJumped = false;
+            playerAnimator.SetBool("isJumping", false);
+            Debug.Log("not stretching or squeezing");
         }
 
         //the values if needed
