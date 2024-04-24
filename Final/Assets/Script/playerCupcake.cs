@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class playerCupcake : MonoBehaviour
 {
     Vector2 move;
-    float jump;
+    float jump, minHeight = 4;
     PlayerInput playerInput;
     CharacterController characterController;
     [SerializeField] Animator playerAnimator;
@@ -16,7 +16,7 @@ public class playerCupcake : MonoBehaviour
     Vector3 velocity, velocityInput, velocityGravity;
     [SerializeField] ParticleSystem cookieCrumbParticle;
     [SerializeField] GameObject playerVisual;
-    public bool hit = false;
+    public bool hit = false, squishTime = false;
 
     int isFlyingCounter = 0;
     bool jumped = false, animJumped = false;
@@ -33,19 +33,18 @@ public class playerCupcake : MonoBehaviour
 
     void FixedUpdate()
     {
-        //move the player
+        //MOVE the player
         move = playerInput.actions["Move"].ReadValue<Vector2>();
-        
-
         Vector3 viewDirection = transform.position - new Vector3(cameraTransform.position.x, transform.position.y, cameraTransform.position.z);
         lookDirection.forward = viewDirection;
-
         transform.forward = Vector3.Slerp(transform.forward, lookDirection.forward, 10 * Time.deltaTime); //leaving slerp because it does not do the thing i thought it did
         velocityInput = lookDirection.forward * move.y + lookDirection.right * move.x;        
 
-        //jump the player
+
+        //JUMP the player
         jump = playerInput.actions["Jump"].ReadValue<float>();
-        if(characterController.isGrounded) //is grounded (50%)
+
+        if (characterController.isGrounded) //is grounded (50%)
         {
             velocityGravity.y = 0;
             isFlyingCounter = 0;
@@ -59,25 +58,37 @@ public class playerCupcake : MonoBehaviour
             {
                 velocityGravity.y = 0;
                 hit = false;
+                playerAnimator.SetBool("isJumping", false);
+                playerAnimator.SetBool("squishTime", false);
                 //ouch bird code goes here
             }
         }
-
-        if (jump > 0 && characterController.isGrounded) //allows liftoff
+        //LIFTOFF the ground
+        if (jump == 1 && jumped == false)
+        {
+            height += 5f * Time.deltaTime;
+            if (height > 10) { height = 10; }
+            squishTime = true;
+        }
+        if (jump == 0 && height > minHeight && isFlyingCounter < 3 && jumped == false)
         {
             velocityGravity.y = Mathf.Sqrt(-2f * gravity);
-            playerVisual.transform.rotation *= Quaternion.Euler(10*jumpedYDirection, 0, 0);
+            playerVisual.transform.rotation *= Quaternion.Euler(10 * jumpedYDirection, 0, 0);
             jumpedYDirection = move.y;
             jumped = true;
-
+        }
+        if (jump == 0 && jumped == true && velocityGravity.y < 0) //resetting height after cupcake reaches peak hieght
+        {
+            height = minHeight;
         }
 
 
-        //they see me rollin, they hatin'
-        Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 2*Time.deltaTime); //might help subtly idk
-        Debug.Log(Quaternion.Angle(playerVisual.transform.rotation, transform.rotation)); //feel free to delete my debugs
+        //ROLL they see me rollin, they hatin'
+        //Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 2*Time.deltaTime); //might help subtly idk
+        //Debug.Log(Quaternion.Angle(playerVisual.transform.rotation, transform.rotation)); //feel free to delete my debugs
         Debug.Log("jumped: " + jumped);
         Debug.Log("jumpedY: " + jumpedYDirection);
+        Debug.Log("height: " + height);
         
 
         if (isFlyingCounter > 4 && jumped == true) //is not grounded (permanent w 5-6 frame delay)
@@ -115,13 +126,24 @@ public class playerCupcake : MonoBehaviour
 
         }
 
+        //more debug yay and slowmo
+        Debug.Log("velGrav: " + velocityGravity.y);
+        //Time.timeScale = 0.25f;
 
-        //animation attempt
-        if (jumped && !animJumped && playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("cupcake_idle")){
+
+        //ANIMATION attempt
+        if (squishTime == true)
+        {
+            playerAnimator.SetBool("squishTime", true);
+            squishTime = false;
+        }
+        else if (jumped && !animJumped && playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("cupcake_squish")){
+            playerAnimator.SetBool("squishTime", false);
             playerAnimator.SetBool("isJumping", true);
             animJumped = true;
             Debug.Log("sqeuuueezing");
-        }else if (!jumped){
+        }
+        else if (!jumped){
             animJumped = false;
             playerAnimator.SetBool("isJumping", false);
             Debug.Log("not stretching or squeezing");
@@ -132,6 +154,8 @@ public class playerCupcake : MonoBehaviour
         //feel free to delete
         Debug.Log("move: " + move);
         Debug.Log("jump: " + jump);
+
+
 
         //particle system
         if (velocityInput.magnitude > 0) cookieCrumbParticle.Play();

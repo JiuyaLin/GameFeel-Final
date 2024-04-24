@@ -9,6 +9,7 @@ public class topOfCupcake : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         playerCupcake.hit = true;
+        //ouch bird script can go here
     }
 
 }
