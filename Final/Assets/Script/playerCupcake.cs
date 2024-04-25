@@ -131,7 +131,7 @@ public class playerCupcake : MonoBehaviour
         //Time.timeScale = 0.25f;
 
 
-        //ANIMATION attempt
+        //ANIMATION attempt2
         if (squishTime == true)
         {
             playerAnimator.SetBool("squishTime", true);
@@ -157,9 +157,17 @@ public class playerCupcake : MonoBehaviour
 
 
 
-        //particle system
-        if (velocityInput.magnitude > 0) cookieCrumbParticle.Play();
-        else cookieCrumbParticle.Stop();
+        //PARTICLE system
+        if (jumped && velocityGravity.y < -0.5 || !jumped && velocityInput.magnitude == 0)
+        {
+            cookieCrumbParticle.Stop();
+        }
+        else
+        {
+            cookieCrumbParticle.Play();
+        }
+
+
 
         velocityInput = lookDirection.forward * move.y + lookDirection.right * move.x; //I updated these values a bunch so we need it again
         characterController.Move(velocityInput * speed * Time.deltaTime + velocityGravity * height * Time.deltaTime);
