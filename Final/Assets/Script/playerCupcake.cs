@@ -6,23 +6,35 @@ using UnityEngine.InputSystem;
 
 public class playerCupcake : MonoBehaviour
 {
+    [Header("GameCore")]
     Vector2 move;
-    float jump, minHeight = 4;
+    float jump;
+
+    public Vector3 velocityInput;
+    [SerializeField] float height, gravity;
+    [SerializeField] Animator playerAnimator;
+    [SerializeField] Transform cameraTransform, lookDirection;
+
     PlayerInput playerInput;
     CharacterController characterController;
-    [SerializeField] Animator playerAnimator;
-    [SerializeField] float  height, gravity;
-    public float playerSpeed;
-    [SerializeField] Transform cameraTransform, lookDirection;
     Vector3 velocity, velocityGravity;
-    public Vector3 velocityInput;
+
+    [Header("Movement")]
+    float currXVelocity, currYVelocity;
+    public float playerSpeed, acceleration, counterAccel, baseVelIncrement, minXVel, maxXVel, minYVel, maxYVel;
+
+
+    [Header("Jumping")]
+    public float minJumpHeight = 4;
+    public bool hit = false, squishTime = false;
+    bool jumped = false, animJumped = false;
+    int isFlyingCounter = 0;
+    float jumpedYDirection = 0;
+
+    [Header("Artistry")]
     [SerializeField] ParticleSystem cookieCrumbParticle;
     [SerializeField] GameObject playerVisual;
-    public bool hit = false, squishTime = false;
-
-    int isFlyingCounter = 0;
-    bool jumped = false, animJumped = false;
-    float jumpedYDirection = 0;
+    
 
     void Start()
     {
@@ -37,6 +49,39 @@ public class playerCupcake : MonoBehaviour
     {
         //MOVE the player
         move = playerInput.actions["Move"].ReadValue<Vector2>();
+        float changeDirX = 1;
+        float changeDirY = 1;
+        if (move.x!= 0 && Mathf.Sign(move.x) != Mathf.Sign(currXVelocity))
+        {
+            changeDirX = counterAccel;
+        }
+        if (move.y!= 0 && Mathf.Sign(move.y) != Mathf.Sign(currYVelocity))
+        {
+            changeDirY = counterAccel;
+        }
+
+        if (move.x != 0)
+        {
+            currXVelocity += baseVelIncrement * acceleration* counterAccel * move.x * changeDirX * Time.deltaTime;
+            if (currXVelocity > maxXVel) { currXVelocity = maxXVel; }
+            else if (currXVelocity < minXVel) { currXVelocity = minXVel; }
+        }
+        else
+        {
+            currXVelocity = Mathf.Lerp(currXVelocity, 0, acceleration * counterAccel * Time.deltaTime);
+        }
+        if (move.y != 0)
+        {
+            currYVelocity += baseVelIncrement * acceleration * counterAccel * move.y * changeDirY * Time.deltaTime;
+            if (currYVelocity > maxYVel) { currYVelocity = maxYVel; }
+            else if (currYVelocity < minYVel) { currYVelocity = minYVel; }
+        }
+        else
+        {
+            currYVelocity = Mathf.Lerp(currYVelocity, 0, acceleration * Time.deltaTime);
+        }
+        move.x = currXVelocity;
+        move.y = currYVelocity;
         Vector3 viewDirection = transform.position - new Vector3(cameraTransform.position.x, transform.position.y, cameraTransform.position.z);
         lookDirection.forward = viewDirection;
         transform.forward = Vector3.Slerp(transform.forward, lookDirection.forward, 10 * Time.deltaTime); //leaving slerp because it does not do the thing i thought it did
@@ -72,7 +117,7 @@ public class playerCupcake : MonoBehaviour
             if (height > 10) { height = 10; }
             squishTime = true;
         }
-        if (jump == 0 && height > minHeight && isFlyingCounter < 3 && jumped == false)
+        if (jump == 0 && height > minJumpHeight && isFlyingCounter < 3 && jumped == false)
         {
             velocityGravity.y = Mathf.Sqrt(-2f * gravity);
             playerVisual.transform.rotation *= Quaternion.Euler(10 * jumpedYDirection, 0, 0);
@@ -81,7 +126,7 @@ public class playerCupcake : MonoBehaviour
         }
         if (jump == 0 && jumped == true && velocityGravity.y < 0) //resetting height after cupcake reaches peak hieght
         {
-            height = minHeight;
+            height = minJumpHeight;
         }
 
 
