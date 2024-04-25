@@ -11,9 +11,11 @@ public class playerCupcake : MonoBehaviour
     PlayerInput playerInput;
     CharacterController characterController;
     [SerializeField] Animator playerAnimator;
-    [SerializeField] float speed, height, gravity;
+    [SerializeField] float  height, gravity;
+    public float playerSpeed;
     [SerializeField] Transform cameraTransform, lookDirection;
-    Vector3 velocity, velocityInput, velocityGravity;
+    Vector3 velocity, velocityGravity;
+    public Vector3 velocityInput;
     [SerializeField] ParticleSystem cookieCrumbParticle;
     [SerializeField] GameObject playerVisual;
     public bool hit = false, squishTime = false;
@@ -170,7 +172,7 @@ public class playerCupcake : MonoBehaviour
 
 
         velocityInput = lookDirection.forward * move.y + lookDirection.right * move.x; //I updated these values a bunch so we need it again
-        characterController.Move(velocityInput * speed * Time.deltaTime + velocityGravity * height * Time.deltaTime);
+        characterController.Move(velocityInput * playerSpeed * Time.deltaTime + velocityGravity * height * Time.deltaTime);
 
 
     }
