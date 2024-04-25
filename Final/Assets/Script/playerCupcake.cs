@@ -205,7 +205,7 @@ public class playerCupcake : MonoBehaviour
 
 
         //PARTICLE system
-        if (jumped && velocityGravity.y < -0.5 || !jumped && velocityInput.magnitude == 0)
+        if (jumped && velocityGravity.y < -0.5 || !jumped && velocityInput.magnitude >= -0.1f && velocityInput.magnitude <= 0.1f)
         {
             cookieCrumbParticle.Stop();
         }
