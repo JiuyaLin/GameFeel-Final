@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class playerCupcake : MonoBehaviour
 {
@@ -37,6 +38,8 @@ public class playerCupcake : MonoBehaviour
 
     RaycastHit hitRaycast;
     public GameObject prefab;
+    GameObject LevelObject;
+    GameObject RotationPivot;
     
 
     void Start()
@@ -46,10 +49,17 @@ public class playerCupcake : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         cookieCrumbParticle.Stop();
+        LevelObject = GameObject.Find("Level");
+        RotationPivot = GameObject.Find("RotationPivot");
     }
 
     void FixedUpdate()
     {
+        if(Input.GetKeyDown(KeyCode.R)){
+            string currentSceneName = SceneManager.GetActiveScene().name;
+            SceneManager.LoadScene(currentSceneName);
+        }
+
         //MOVE the player
         move = playerInput.actions["Move"].ReadValue<Vector2>();
         float changeDirX = 1;
@@ -183,7 +193,11 @@ public class playerCupcake : MonoBehaviour
                 //transform.position = newObject.transform.position;
                 //Destroy(newObject);
 
-                hitRaycast.collider.gameObject.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, Mathf.Acos(hitRaycast.normal.y / Vector3.Magnitude(hitRaycast.normal)) * hitRaycast.collider.gameObject.transform.rotation;
+                //hitRaycast.collider.gameObject.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, hitRaycast.normal);
+                LevelObject.transform.parent = RotationPivot.transform;
+                Vector3 rotationTo = new Vector3 ( -Vector3.forward.x, -Vector3.forward.y, hitRaycast.normal.z);
+                RotationPivot.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, rotationTo);
+                LevelObject.transform.parent = null;
 
                 //hitRaycast.collider.gameObject.transform.rotation = Mathf.Acos(hitRaycast.normal.y / Vector3.Magnitude(hitRaycast.normal));
             }
