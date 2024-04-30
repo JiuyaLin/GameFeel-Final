@@ -34,6 +34,9 @@ public class playerCupcake : MonoBehaviour
     [Header("Artistry")]
     [SerializeField] ParticleSystem cookieCrumbParticle;
     [SerializeField] GameObject playerVisual;
+
+    RaycastHit hitRaycast;
+    public GameObject prefab;
     
 
     void Start()
@@ -95,6 +98,8 @@ public class playerCupcake : MonoBehaviour
         {
             velocityGravity.y = 0;
             isFlyingCounter = 0;
+           
+
         }
         else  //note to self: these two statements alternate every other frame so do not rely 
         {
@@ -170,7 +175,18 @@ public class playerCupcake : MonoBehaviour
             jumped = false;
             playerVisual.transform.rotation = transform.rotation;
             Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 10 * Time.deltaTime); //might help idk
+            if (Physics.Raycast(transform.position, Vector3.down, out hitRaycast, 5f, -1) && move.y != 0)
+            {
+                //GameObject newObject = Instantiate(prefab, GameObject.Find("Level").transform);
+                //newObject.transform.position = transform.position;
+                //hitRaycast.collider.gameObject.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, hitRaycast.normal) * hitRaycast.collider.gameObject.transform.rotation;
+                //transform.position = newObject.transform.position;
+                //Destroy(newObject);
 
+                hitRaycast.collider.gameObject.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, Mathf.Acos(hitRaycast.normal.y / Vector3.Magnitude(hitRaycast.normal)) * hitRaycast.collider.gameObject.transform.rotation;
+
+                //hitRaycast.collider.gameObject.transform.rotation = Mathf.Acos(hitRaycast.normal.y / Vector3.Magnitude(hitRaycast.normal));
+            }
         }
 
         //more debug yay and slowmo
@@ -221,4 +237,5 @@ public class playerCupcake : MonoBehaviour
 
 
     }
+
 }
