@@ -31,6 +31,7 @@ public class playerCupcake : MonoBehaviour
     bool jumped = false, animJumped = false;
     int isFlyingCounter = 0;
     float jumpedYDirection = 0;
+    bool otherJump = true;
 
     [Header("Artistry")]
     [SerializeField] ParticleSystem cookieCrumbParticle;
@@ -108,8 +109,6 @@ public class playerCupcake : MonoBehaviour
         {
             velocityGravity.y = 0;
             isFlyingCounter = 0;
-           
-
         }
         else  //note to self: these two statements alternate every other frame so do not rely 
         {
@@ -126,7 +125,7 @@ public class playerCupcake : MonoBehaviour
             }
         }
         //LIFTOFF the ground
-        if (jump == 1 && jumped == false)
+        if (jump == 1 && jumped == false || otherJump == true && jump ==1)
         {
             height += 5f * Time.deltaTime;
             if (height > 10) { height = 10; }
@@ -138,6 +137,7 @@ public class playerCupcake : MonoBehaviour
             playerVisual.transform.rotation *= Quaternion.Euler(10 * jumpedYDirection, 0, 0);
             jumpedYDirection = move.y;
             jumped = true;
+            otherJump = false;
         }
         if (jump == 0 && jumped == true && velocityGravity.y < 0) //resetting height after cupcake reaches peak hieght
         {
@@ -167,7 +167,7 @@ public class playerCupcake : MonoBehaviour
         }
         else if (jumped == true && isFlyingCounter < 4 && Quaternion.Angle(playerVisual.transform.rotation, transform.rotation) > 6f) //landed imperfectly
         {
-
+            otherJump = true;
             if (move.y != 0) //permits roll direction change
             {
                 playerVisual.transform.rotation *= Quaternion.Euler(10*move.y, 0, 0);
@@ -185,7 +185,7 @@ public class playerCupcake : MonoBehaviour
             jumped = false;
             playerVisual.transform.rotation = transform.rotation;
             Quaternion.Lerp(playerVisual.transform.rotation, transform.rotation, 10 * Time.deltaTime); //might help idk
-            if (Physics.Raycast(transform.position, Vector3.down, out hitRaycast, 5f, -1) && move.y != 0)
+            if (Physics.Raycast(transform.position, Vector3.down, out hitRaycast, 5f, -1))
             {
                 //GameObject newObject = Instantiate(prefab, GameObject.Find("Level").transform);
                 //newObject.transform.position = transform.position;
@@ -194,10 +194,21 @@ public class playerCupcake : MonoBehaviour
                 //Destroy(newObject);
 
                 //hitRaycast.collider.gameObject.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, hitRaycast.normal);
+                Debug.Log("ray x: " + hitRaycast.normal.x);
+                Debug.Log("ray y: " + hitRaycast.normal.y);
+                Debug.Log("ray z: " + hitRaycast.normal.z);
+
                 LevelObject.transform.parent = RotationPivot.transform;
-                Vector3 rotationTo = new Vector3 ( -Vector3.forward.x, -Vector3.forward.y, hitRaycast.normal.z);
-                RotationPivot.transform.rotation = Quaternion.FromToRotation(-Vector3.forward, rotationTo);
-                LevelObject.transform.parent = null;
+                Vector3 rotationTo = new Vector3 (-hitRaycast.normal.x, 0, 0);
+                Vector3 thisisDumb = new Vector3(RotationPivot.transform.rotation.x, 0, 0);
+
+                //Quaternion newRotation = RotationPivot.transform.rotation * Quaternion.Euler(rotationTo);
+                //RotationPivot.transform.rotation = newRotation;
+                RotationPivot.transform.rotation = Quaternion.RotateTowards(RotationPivot.transform.rotation, RotationPivot.transform.rotation * Quaternion.Euler(rotationTo), 20*Time.deltaTime);
+                //RotationPivot.transform.rotation = RotationPivot.transform.rotation * Quaternion.Euler(rotationTo);
+
+                //RotationPivot.transform.rotation = Quaternion.FromToRotation(thisisDumb, rotationTo);
+                RotationPivot.transform.parent = null;
 
                 //hitRaycast.collider.gameObject.transform.rotation = Mathf.Acos(hitRaycast.normal.y / Vector3.Magnitude(hitRaycast.normal));
             }

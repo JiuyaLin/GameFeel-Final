@@ -769,7 +769,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406405514}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.35718778, y: -0.005704473, z: 0.002181521, w: 0.93401265}
+  m_LocalRotation: {x: 0.35718778, y: -0.0057044723, z: 0.0021815207, w: 0.93401265}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -11100,7 +11100,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.35718778, y: -0.0057044723, z: 0.0021815207, w: 0.93401265}
+  m_LocalRotation: {x: 0.35718778, y: -0.005704472, z: 0.0021815205, w: 0.93401265}
   m_LocalPosition: {x: 0, y: 2.52, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -11358,7 +11358,7 @@ MonoBehaviour:
   counterAccel: 4
   baseVelIncrement: 0.25
   minXVel: -5
-  maxXVel: 5
+  maxXVel: 1.45
   minYVel: -2
   maxYVel: 5
   minJumpHeight: 4
